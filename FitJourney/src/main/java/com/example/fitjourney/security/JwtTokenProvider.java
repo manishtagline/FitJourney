@@ -1,5 +1,6 @@
 package com.example.fitjourney.security;
 
+import java.time.Instant;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -17,25 +18,26 @@ public class JwtTokenProvider {
 	@Value("${jwt.secret}")
 	private String jwtSecret;
 	
-	@Value("${jwt.expireation}")
-	private String jwtExpiration;
+	@Value("${jwt.expirationMs}")
+	private long jwtExpiration;
 	
 	
 	public String generateToken(Authentication authentication) {
-		String username = authentication.getName();
-		Date now = new Date();
-		Date expiry = new Date(now.getTime() + jwtExpiration);
+		String email = authentication.getName();
+
+	    Instant now = Instant.now();
+	    Instant expiry = now.plusMillis(jwtExpiration);
 		SecretKey secret = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 		
 		return Jwts.builder()
-				.setSubject(username)
-				.setIssuedAt(now)
-				.setExpiration(expiry)
+				.setSubject(email)
+				.setIssuedAt(Date.from(now))
+				.setExpiration(Date.from(expiry))
 				.signWith(secret)
 				.compact();
 	}
 	
-	public String getUsernameFromToken(String token) {
+	public String getEmailFromToken(String token) {
 		return Jwts.parserBuilder()
 				.setSigningKey(jwtSecret.getBytes())
 				.build()

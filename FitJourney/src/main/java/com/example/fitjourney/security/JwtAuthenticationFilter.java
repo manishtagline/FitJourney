@@ -29,20 +29,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String header = request.getHeader("Authorization");
 		String token = null;
-		String username = null;
+		String email = null;
 
 		try {
 
 			if (header != null && header.startsWith("Bearer ")) {
 				token = header.substring(7);
-				username = tokenProvider.getUsernameFromToken(token);
-				log.debug("JWT Token found for user: {}", username);
+				email = tokenProvider.getEmailFromToken(token);
+				log.debug("JWT Token found for email: {}", email);
 			} else {
 				log.trace("No Authorization header or not a Bearer token");
 			}
 
-			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				var userDetails = userDetailsService.loadUserByUsername(username);
+			if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				var userDetails = userDetailsService.loadUserByUsername(email);
 				if (tokenProvider.validateToken(token)) {
 					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 							userDetails, null, userDetails.getAuthorities());
@@ -50,9 +50,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-					log.info("Authenticated user: {}", username);
+					log.info("Authenticated user of email: {}", email);
 				} else {
-					log.warn("Invalid or expired JWT for user: {}", username);
+					log.warn("Invalid or expired JWT for user of email: {}", email);
 				}
 			}
 

@@ -16,8 +16,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    private String firstName;
-    private String lastName;
+    private String username;
 
     @Column(unique = true, nullable = false)
     private String email; 
@@ -27,4 +26,5 @@ public class User {
     
 
     private boolean enabled = true;
+    
 }
