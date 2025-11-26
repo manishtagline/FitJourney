@@ -167,8 +167,3 @@ This project is intended to be MIT licensed. Add a `LICENSE` file (MIT) at the r
 - Repo: https://github.com/manishtagline/FitJourney
 
 ---
-
-If you’d like, I can:
-- Commit this README directly to the repository for you, or
-- Generate a Dockerfile, docker-compose.yml, or an OpenAPI spec next.
-Tell me which one you want me to add and I’ll prepare it. 
