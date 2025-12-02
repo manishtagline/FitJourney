@@ -3,6 +3,7 @@ package com.example.fitjourney.security;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
+import com.example.fitjourney.entity.Role;
 import com.example.fitjourney.entity.User;
 import com.example.fitjourney.repository.UserRepository;
 
@@ -27,9 +28,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 		log.info("User found: {} (enabled = {})", user.getEmail(), user.isEnabled());
 
-		UserDetails userDetails = org.springframework.security.core.userdetails.User.builder().username(user.getEmail())
-				.password(user.getPassword()).roles("USER") 				
-				.disabled(!user.isEnabled()).build();
+		String[] roleNames = user.getRoles()
+							.stream()
+							.map(role -> role.getRole().name())
+							.toArray(String[]::new);
+
+		UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+									.username(user.getEmail())
+									.password(user.getPassword())
+									.roles(roleNames)
+									.disabled(!user.isEnabled()).build();
 
 		log.debug("UserDetails object built successfully for: {}", user.getEmail());
 		return userDetails;

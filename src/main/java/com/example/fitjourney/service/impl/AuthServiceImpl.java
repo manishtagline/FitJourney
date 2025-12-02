@@ -1,5 +1,7 @@
 package com.example.fitjourney.service.impl;
 
+import java.util.Set;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -10,7 +12,9 @@ import org.springframework.stereotype.Service;
 import com.example.fitjourney.dto.request.LoginRequest;
 import com.example.fitjourney.dto.request.RegisterRequest;
 import com.example.fitjourney.dto.response.AuthResponse;
+import com.example.fitjourney.entity.Role;
 import com.example.fitjourney.entity.User;
+import com.example.fitjourney.repository.RoleRepository;
 import com.example.fitjourney.repository.UserRepository;
 import com.example.fitjourney.security.JwtTokenProvider;
 import com.example.fitjourney.service.AuthService;
@@ -29,27 +33,38 @@ public class AuthServiceImpl implements AuthService{
 	
 	private final AuthenticationManager authManager;
 	
+	private final RoleRepository roleRepository;
+	
 	private final JwtTokenProvider tokenProvider;
 	
-	@Override
-	public String registerUser(RegisterRequest request) {
-		log.info("Attempting to register user with email: {}", request.getEmail());
-		
-		if(userRepository.findByEmail(request.getEmail()).isPresent()) {
-			log.warn("Registeration failed email '{}' is already regsired!!!", request.getEmail());
-			throw new IllegalArgumentException("Email already exists!!!");
-		}
-		
-		User user = new User();
-		user.setUsername(request.getUsername());
-		user.setEmail(request.getEmail());
-		user.setPassword(passwordEncoder.encode(request.getPassword()));
-		
-		userRepository.save(user);
-		
-		log.info("User registered successfully: {}", request.getEmail());
-	    return "User registered successfully!";
-	}
+    @Override
+    public String registerUser(RegisterRequest request) {
+
+        log.info("Register request received | email={}", request.getEmail());
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.warn("Registration failed | email={} already exists", request.getEmail());
+            throw new IllegalArgumentException("Email already exists!");
+        }
+
+        Role userRole = roleRepository.findByName("USER")
+                .orElseThrow(() -> {
+                    log.error("Registration failed | USER role not found");
+                    return new RuntimeException("USER role not found");
+                });
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRoles(Set.of(userRole));
+
+        userRepository.save(user);
+
+        log.info("User successfully registered | email={}", request.getEmail());
+        return "User registered successfully!";
+    }
+
 
 	@Override
 	public AuthResponse loginUser(LoginRequest request) {

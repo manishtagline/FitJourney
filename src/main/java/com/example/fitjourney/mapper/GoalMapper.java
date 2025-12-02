@@ -27,7 +27,7 @@ public class GoalMapper {
 		
 	}
 	
-	public static GoalResponseDTO toDto(Goal g) {
+	public  GoalResponseDTO toDto(Goal g) {
 		if(g == null)
 			return null;
 		
